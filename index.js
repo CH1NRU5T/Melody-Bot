@@ -15,9 +15,10 @@ for (const file of commmandFiles) {
   const command = require(`./commands/${file}`);
   client.commands.set(command.name, command);
 }
+
 //get song function
-var songLink1 = () => {
-  return axios.get('https://apg-saavn-api.herokuapp.com/result/?q=ek%20ajnabee&lyrics=true')
+var songLink1 = (searchQuery) => {
+  return axios.get('https://apg-saavn-api.herokuapp.com/result/?q=' + searchQuery)
     .then(res => res.data[0].media_url)
     .catch(err => console.log(err))
 }
@@ -29,15 +30,24 @@ client.on(`message`, msg => {
   if (!msg.content.startsWith(prefix) || msg.author.bot) return;
   const args = msg.content.slice(prefix.length).split(/ +/);
   const command = args.shift().toLowerCase();
-
+  // console.log(command);
   if (command === `play` || command === `p`) {
-    playSong(msg, songLink1().then(res => console.log(res)))
+    // songLink1().then(res => playSong(msg, res));
+
+    link = songLink1(getSongName(args)).then(res => playSong(msg, res))
   }
   else if (command === `leave`) {
     client.commands.get(`leave`).execute(msg, args);
   }
 })
 
+var getSongName = (args) => {
+  var name = ""
+  args.forEach(element => {
+    name += element;
+  });
+  return name
+}
 
 function playSong(msg, link) {
   msg.member.voice.channel.join().then(VoiceConnection => {
