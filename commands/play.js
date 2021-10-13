@@ -1,52 +1,39 @@
-const ytdl = require(`ytdl-core`);
-const ytSearch = require(`yt-search`);
-
+const axios = require('axios')
 module.exports = {
 
   name: `play`,
 
   description: `Joins and plays a video from youtube`,
 
-  async execute(msg, args) {
+  execute(message, args) {
 
-    const voiceChannel = msg.member.voice.channel;
-
-    if (!voiceChannel) {
-
-      return msg.reply(`You need to be in a voice channel to listen to music dumbass`);
-
-    }
-    const permissions = voiceChannel.permissionsFor(msg.client.user);
-
-    if (!permissions.has(`CONNECT`)) return msg.channel.send(`You don't have the correct permissions`);
-
-    if (!permissions.has(`SPEAK`)) return msg.channel.send(`You don't have the correct permissions`);
-
-    if (!args.length) return msg.channel.send(`You need to type the name of the song`);
-
-    const connection = await voiceChannel.join();
-
-    //function to find video based on search queries
-    const videoFinder = async (query) => {
-      //yt search
-      const videoResult = await ytSearch(query);
-
-      return (videoResult.videos.length > 1) ? videoResult.videos[0] : null;
+    //function to get the direct mp3 link of the searched song
+    var songLink1 = (searchQuery) => {
+      return axios.get('https://apg-saavn-api.herokuapp.com/result/?q=' + searchQuery)
+        .then(res => res.data[0].media_url)
+        .catch(err => console.log(err))
     }
 
-    const video = await videoFinder(args.join(` `));
-
-    if (video) {
-      const stream = ytdl(video.url, { filter: 'audioonly' });
-
-      connection.play(stream, { seek: 0, volume: 1 })
-        .on(`finish`, () => {
-          voiceChannel.leave();
-        });
-
-      await msg.reply(`:thumbsup: Now Playing ***${video.title}***`);
-    } else {
-      msg.channel.send(`No video result found`);
+    // function to turn the arguments into a string so that search query can be performed
+    var getSongName = (args) => {
+      var name = ""
+      args.forEach(element => {
+        name += element;
+      });
+      return name
     }
+
+    //function to join the user voice channel and play the song
+    function playSong(msg, link) {
+      msg.member.voice.channel.join().then(VoiceConnection => {
+        VoiceConnection.play(link, { seek: 0, volume: 1 }).on("finish", () => VoiceConnection.disconnect());
+        msg.reply("Playing...");
+      }).catch(e => console.log(e))
+    }
+
+    //start from here
+    link = songLink1(getSongName(args)).then(res => playSong(message, res))
   }
+
+
 }

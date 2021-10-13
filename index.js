@@ -18,11 +18,7 @@ for (const file of commmandFiles) {
 }
 
 //get song function
-var songLink1 = (searchQuery) => {
-  return axios.get('https://apg-saavn-api.herokuapp.com/result/?q=' + searchQuery)
-    .then(res => res.data[0].media_url)
-    .catch(err => console.log(err))
-}
+
 client.once(`ready`, () => {
   console.log(`MelodyBot is online`);
 })
@@ -34,28 +30,17 @@ client.on(`message`, msg => {
   // console.log(command);
   if (command === `play` || command === `p`) {
     // songLink1().then(res => playSong(msg, res));
+    client.commands.get(`play`).execute(msg, args);
 
-    link = songLink1(getSongName(args)).then(res => playSong(msg, res))
   }
   else if (command === `leave`) {
     client.commands.get(`leave`).execute(msg, args);
   }
 })
 
-var getSongName = (args) => {
-  var name = ""
-  args.forEach(element => {
-    name += element;
-  });
-  return name
-}
 
-function playSong(msg, link) {
-  msg.member.voice.channel.join().then(VoiceConnection => {
-    VoiceConnection.play(link, { seek: 0, volume: 1 }).on("finish", () => VoiceConnection.disconnect());
-    msg.reply("Playing...");
-  }).catch(e => console.log(e))
-}
+
+
 
 //login
 keepAlive();
