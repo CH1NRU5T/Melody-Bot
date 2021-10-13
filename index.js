@@ -1,5 +1,4 @@
 const discord = require('discord.js');
-const https = require('https');
 const keepAlive = require('./server');
 const client = new discord.Client();
 const axios = require('axios');
