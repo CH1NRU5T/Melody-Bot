@@ -24,9 +24,13 @@ client.on(`message`, msg => {
   if (!msg.content.startsWith(prefix) || msg.author.bot) return;
   const args = msg.content.slice(prefix.length).split(/ +/);
   const command = args.shift().toLowerCase();
+  console.log(command);
   if (command === `play` || command === `p`) {
     client.commands.get(`play`).execute(msg, args);
-
+  }
+  else if (command === `playfile`) {
+    console.log('hello');
+    client.commands.get(`playfile`).execute(msg, args);
   }
   else if (command === `leave`) {
     client.commands.get(`leave`).execute(msg, args);
